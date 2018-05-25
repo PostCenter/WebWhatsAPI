@@ -599,6 +599,9 @@ window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done)
         for (let i = messages.length - 1; i >= 0; i--) {
             let messageObj = messages[i];
             if (messageObj.__x_isNewMsg || messageObj.__x_MustSent) {
+                if(messageObj.__x_isSentByMe && !includeMe) {
+                    break;
+                }
                 let message = WAPI.processMessageObj(messageObj, includeMe,  includeNotifications);
                 if(message){
                     messageObj.__x_isNewMsg = false;
