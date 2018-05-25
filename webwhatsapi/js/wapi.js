@@ -469,14 +469,14 @@ window.WAPI.sendMessageToID = function (id, message, done) {
     if(window.WAPI.getChatModels().length == 0)
         return false;
 
-    var originalID = getChatModels()[0].id;
-    getChatModels()[0].id = id;
+    var originalID = window.WAPI.getChatModels()[0].id;
+    window.WAPI.getChatModels()[0].id = id;
     if (done !== undefined) {
-        getChatModels()[0].sendMessage(message).then(function(){ getChatModels()[0].id = originalID; done(true); });
+        window.WAPI.getChatModels()[0].sendMessage(message).then(function(){ window.WAPI.getChatModels()[0].id = originalID; done(true); });
         return true;
     } else {
-        getChatModels()[0].sendMessage(message);
-        getChatModels()[0].id = originalID;
+        window.WAPI.getChatModels()[0].sendMessage(message);
+        window.WAPI.getChatModels()[0].id = originalID;
         return true;
     }
 
@@ -489,7 +489,7 @@ window.WAPI.sendMessageToID = function (id, message, done) {
 }
 
 window.WAPI.sendMessage = function (id, message, done) {
-    const Chats = getChatModels();
+    const Chats = window.WAPI.getChatModels();
 
     for (const chat in Chats) {
         if (isNaN(chat)) {
@@ -539,7 +539,7 @@ window.WAPI.sendMessage = function (id, message, done) {
 
 
 window.WAPI.sendSeen = function (id, done) {
-    const Chats = getChatModels();
+    const Chats = window.WAPI.getChatModels();
 
     for (const chat in Chats) {
         if (isNaN(chat)) {
@@ -584,7 +584,7 @@ function isChatMessage(message) {
 
 
 window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done) {
-    const chats = getChatModels();
+    const chats = window.WAPI.getChatModels();
     let output = [];
     for (let chat in chats) {
         if (isNaN(chat)) {
@@ -621,7 +621,7 @@ window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done)
 };
 
 window.WAPI.markDefaultUnreadMessages = function (done) {
-    const chats = getChatModels();
+    const chats = window.WAPI.getChatModels();
     let output = [];
     for (let chat in chats) {
         if (isNaN(chat)) {
