@@ -297,13 +297,37 @@ window.WAPI.areAllMessagesLoaded = function (id, done) {
 window.WAPI.loadEarlierMessagesTillDate = function (id, lastMessage, done) {
     const found = window.WAPI.getChatModels().find((chat) => chat.id === id);
     x = function(){
-        if(found.msgs.models[0].t>lastMessage){
+        if(found.msgs.models.length == 0){
+            done()
+        }
+        else if(found.msgs.models[0].t>lastMessage){
             found.loadEarlierMsgs().then(x);
         }else {
             done();
         }
     };
     x();
+};
+
+/**
+ * Load more messages in all chats from store till a particular date
+ * @param lastMessage
+ * @param done
+ */
+window.WAPI.loadEarlierMessagesTillDateAllChats = function (lastMessage, done) {
+    const chats = window.WAPI.getChatModels();
+
+    for (let chat in chats) {
+        if (isNaN(chat)) {
+            continue;
+        }
+        const currentChat = chats[chat];
+        const id = currentChat.id;
+        window.WAPI.loadEarlierMessagesTillDate(
+            id, lastMessage, () => {}
+        );
+    }
+    done();
 };
 
 
