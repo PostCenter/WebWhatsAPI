@@ -7,6 +7,7 @@ WebWhatsAPI module
 
 import binascii
 import logging
+from datetime import datetime, timedelta
 from json import dumps, loads
 
 import os
@@ -543,6 +544,21 @@ class WhatsAPIDriver(object):
         :return:
         """
         return self.wapi_functions.deleteConversation(chat_id)
+
+    def get_all_messages_until_date(self, date):
+        """
+        Get all the messages on whatsapp until a min(date, 7 days)
+        :return:
+        """
+        seven_days_ago = int((datetime.now() - timedelta(days=7)).timestamp())
+        if date is None:
+            date = seven_days_ago
+        else:
+            date = max(date, seven_days_ago)
+        self.wapi_functions.window.WAPI.loadEarlierMessagesTillDateAllChats(
+            date
+        )
+        return self.wapi_functions.getAllLatestMessages()
 
     def quit(self):
         self.driver.quit()

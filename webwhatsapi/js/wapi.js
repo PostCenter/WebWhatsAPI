@@ -13,14 +13,14 @@ window.WAPI = {
  * @returns {*}
  */
 window.WAPI.getChatModels = function(){
-	    return document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.memoizedState.chats;
+    return document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.memoizedState.chats;
 };
 
 /**
- * Hotfix wat 
+ * Hotfix wat
  * @returns {*}
  */
-window.WAPI.getConn = function(){ 
+window.WAPI.getConn = function(){
     return document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.memoizedProps.children[5].props.conn;
 };
 
@@ -297,13 +297,37 @@ window.WAPI.areAllMessagesLoaded = function (id, done) {
 window.WAPI.loadEarlierMessagesTillDate = function (id, lastMessage, done) {
     const found = window.WAPI.getChatModels().find((chat) => chat.id === id);
     x = function(){
-        if(found.msgs.models[0].t>lastMessage){
+        if(found.msgs.models.length == 0){
+            done()
+        }
+        else if(found.msgs.models[0].t>lastMessage){
             found.loadEarlierMsgs().then(x);
         }else {
             done();
         }
     };
     x();
+};
+
+/**
+ * Load more messages in all chats from store till a particular date
+ * @param lastMessage
+ * @param done
+ */
+window.WAPI.loadEarlierMessagesTillDateAllChats = function (lastMessage, done) {
+    const chats = window.WAPI.getChatModels();
+
+    for (let chat in chats) {
+        if (isNaN(chat)) {
+            continue;
+        }
+        const currentChat = chats[chat];
+        const id = currentChat.id;
+        window.WAPI.loadEarlierMessagesTillDate(
+            id, lastMessage, () => {}
+        );
+    }
+    done();
 };
 
 
@@ -444,8 +468,8 @@ window.WAPI.getAllMessageIdsInChat = function (id, includeMe, includeNotificatio
     const messages = chat.msgs.models;
     for (const i in messages) {
         if ((i === "remove")
-                || (!includeMe && messages[i].isMe)
-                || (!includeNotifications && messages[i].isNotification)) {
+            || (!includeMe && messages[i].isMe)
+            || (!includeNotifications && messages[i].isNotification)) {
             continue;
         }
         output.push(messages[i].id._serialized);
@@ -503,7 +527,7 @@ window.WAPI.sendMessage = function (id, message, done) {
             if (done !== undefined) {
                 Chats[chat].sendMessage(message).then(function () {
                     function sleep(ms) {
-                      return new Promise(resolve => setTimeout(resolve, ms));
+                        return new Promise(resolve => setTimeout(resolve, ms));
                     }
 
                     var trials = 0;
@@ -581,6 +605,47 @@ function isChatMessage(message) {
     }
     return true;
 }
+
+/**
+ * Method to get all the visible messages on the account.
+ * @param includeMe
+ * @param includeNotifications
+ * @param done
+ * @returns {Array}
+ */
+window.WAPI.getAllLatestMessages = function(includeMe,
+                                            includeNotifications,
+                                            done) {
+    const chats = window.WAPI.getChatModels();
+    let output = [];
+    for (let chat in chats) {
+        if (isNaN(chat)) {
+            continue;
+        }
+
+        let messageGroupObj = chats[chat];
+        let messageGroup = WAPI._serializeChatObj(messageGroupObj);
+        messageGroup.messages = [];
+
+        const messages = messageGroupObj.msgs.models;
+
+        // Get all messages availables to then be processed and filter the undef
+        messageGroup.messages = messages.map(
+            (messageObj) => WAPI.processMessageObj(
+                messageObj, includeMe,  includeNotifications
+            )
+        ).filter(msg => msg? true : false);
+
+        if (messageGroup.messages.length > 0) {
+            output.push(messageGroup);
+        }
+    }
+    if (done !== undefined) {
+        done(output);
+    }
+    return output;
+
+};
 
 
 window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done) {
