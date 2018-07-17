@@ -545,10 +545,19 @@ class WhatsAPIDriver(object):
         """
         return self.wapi_functions.deleteConversation(chat_id)
 
-    def get_all_messages_until_date(self, date):
+    def get_all_messages_until_date(
+            self, date=None, include_me=True, include_notifications=False
+    ):
         """
         Get all the messages on whatsapp until a min(date, 7 days)
-        :return:
+        :param date: Date until the messages are get.
+        :type date: date in timestamp or None
+        :param include_me: Include user's messages
+        :type include_me: bool or None
+        :param include_notifications: Include events happening on chat
+        :type include_notifications: bool or None
+        :return: List of messages grouped by chats
+        :rtype: list[MessageGroup]
         """
         seven_days_ago = int((datetime.now() - timedelta(days=7)).timestamp())
         if date is None:
@@ -558,7 +567,26 @@ class WhatsAPIDriver(object):
         self.wapi_functions.window.WAPI.loadEarlierMessagesTillDateAllChats(
             date
         )
-        return self.wapi_functions.getAllLatestMessages()
+        raw_message_groups = self.wapi_functions.getAllLatestMessages(
+            include_me, include_notifications
+        )
+
+        unread_messages = []
+        for raw_message_group in raw_message_groups:
+            chat = factory_chat(raw_message_group, self)
+            messages = sorted(
+                map(
+                    lambda message:  factory_message(message, self),
+                    filter(
+                        lambda msg: msg["timestamp"] >= date,
+                        raw_message_group['messages']
+                    )
+                ),
+                key=lambda message: message.timestamp
+            )
+            unread_messages.append(MessageGroup(chat, messages))
+
+        return unread_messages
 
     def quit(self):
         self.driver.quit()
