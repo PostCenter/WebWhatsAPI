@@ -314,7 +314,10 @@ class WhatsAPIDriver(object):
         """
         return self.wapi_functions.getAllChatIds()
 
-    def get_unread(self, include_me=False, include_notifications=False):
+    def get_unread(
+            self, include_me=False,
+            include_notifications=False, filter_week=True
+    ):
         """
         Fetches unread messages
 
@@ -322,15 +325,40 @@ class WhatsAPIDriver(object):
         :type include_me: bool or None
         :param include_notifications: Include events happening on chat
         :type include_notifications: bool or None
+        :param filter_week: Filter only the last week of messages
+        :type filter_week: bool
         :return: List of unread messages grouped by chats
         :rtype: list[MessageGroup]
         """
-        raw_message_groups = self.wapi_functions.getUnreadMessages(include_me, include_notifications)
+
+        seven_days_ago = int((datetime.now() - timedelta(days=7)).timestamp())
+        raw_message_groups = self.wapi_functions.getUnreadMessages(
+            include_me, include_notifications
+        )
 
         unread_messages = []
         for raw_message_group in raw_message_groups:
             chat = factory_chat(raw_message_group, self)
-            messages = [factory_message(message, self) for message in raw_message_group['messages']]
+
+            if filter_week:
+                messages = sorted(
+                    map(
+                        lambda message: factory_message(message, self),
+                        filter(
+                            lambda msg: msg["timestamp"] >= seven_days_ago,
+                            raw_message_group['messages']
+                        )
+                    ),
+                    key=lambda message: message.timestamp
+                )
+            else:
+                messages = list(
+                    map(
+                        lambda message: factory_message(message, self),
+                        raw_message_group['messages']
+                    )
+                )
+
             unread_messages.append(MessageGroup(chat, messages))
 
         return unread_messages
