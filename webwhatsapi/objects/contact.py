@@ -20,6 +20,7 @@ class Contact(WhatsappObjectWithId):
         self.short_name = js_obj["shortName"]
         self.push_name = js_obj["pushname"]
         self.formatted_name = js_obj["formattedName"]
+        self.isMe = js_obj["isMe"]
 
     @driver_needed
     def get_common_groups(self):
