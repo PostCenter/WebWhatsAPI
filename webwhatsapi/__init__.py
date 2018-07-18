@@ -592,7 +592,7 @@ class WhatsAPIDriver(object):
             date = seven_days_ago
         else:
             date = max(date, seven_days_ago)
-        self.wapi_functions.window.WAPI.loadEarlierMessagesTillDateAllChats(
+        self.wapi_functions.loadEarlierMessagesTillDateAllChats(
             date
         )
         raw_message_groups = self.wapi_functions.getAllLatestMessages(
