@@ -80,6 +80,10 @@ window.WAPI._serializeMessageObj = (obj) => {
         return null;
     }
 
+    if (obj.type == 'revoked') {
+        return null;
+    }
+
     return Object.assign(window.WAPI._serializeRawObj(obj), {
         id: obj.id._serialized,
         sender: obj["senderObj"]?WAPI._serializeContactObj(obj["senderObj"]): null,
