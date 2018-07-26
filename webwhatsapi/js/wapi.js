@@ -3,27 +3,93 @@
  */
 
 
+if (!window.Store) {
+    (function() {
+        function getStore(modules) {
+            let foundCount = 0;
+            let neededObjects = [
+                { id: "Store", conditions: (module) => (module.Chat && module.Msg) ? module : null },
+                { id: "Wap", conditions: (module) => (module.createGroup) ? module : null },
+                {id: "MediaCollection", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.processFiles !== undefined) ? module.default : null},
+                { id: "WapDelete", conditions: (module) => (module.sendConversationDelete && module.sendConversationDelete.length == 2) ? module : null },
+                { id: "Conn", conditions: (module) => (module.default && module.default.ref && module.default.refTTL) ? module.default : null },
+                { id: "WapQuery", conditions: (module) => (module.queryExist) ? module : null },
+                { id: "ProtoConstructor", conditions: (module) => (module.prototype && module.prototype.constructor.toString().indexOf('binaryProtocol deprecated version') >= 0) ? module : null }
+            ];
+
+            for (let idx in modules) {
+                if ((typeof modules[idx] === "object") && (modules[idx] !== null)) {
+                    let first = Object.values(modules[idx])[0];
+                    if ((typeof first === "object") && (first.exports)) {
+                        for (let idx2 in modules[idx]) {
+                            let module = modules(idx2);
+                            if (!module) {
+                                continue;
+                            }
+
+                            neededObjects.forEach((needObj) => {
+                                if(!needObj.conditions || needObj.foundedModule) return;
+                                let neededModule = needObj.conditions(module);
+                                if(neededModule !== null) {
+                                    foundCount++;
+                                    needObj.foundedModule = neededModule;
+                                }
+                            });
+
+                            if(foundCount == neededObjects.length) {
+                                break;
+                            }
+                        }
+
+                        let neededStore = neededObjects.find((needObj) => needObj.id === "Store");
+                        window.Store = neededStore.foundedModule ? neededStore.foundedModule : {};
+                        neededObjects.splice(neededObjects.indexOf(neededStore), 1);
+                        neededObjects.forEach((needObj) => {
+                            if(needObj.foundedModule) {
+                                window.Store[needObj.id] = needObj.foundedModule;
+                            }
+                        });
+
+                        return window.Store;
+                    }
+                }
+            }
+        }
+
+        webpackJsonp([], {'parasite': (x, y, z) => getStore(z)}, 'parasite');
+    })();
+}
+
+
+
 window.WAPI = {
     lastRead: {}
 };
 
 
 /**
- * Hotfix way to get chat messages.
+ * Get chat models.
  * @returns {*}
  */
 window.WAPI.getChatModels = function(){
-    return document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.memoizedState.chats;
+    return window.Store.Chat || document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.memoizedState.chats;
 };
 
 /**
- * Hotfix wat
+ * Get connection data
  * @returns {*}
  */
 window.WAPI.getConn = function(){
-    return document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.memoizedProps.children[5].props.conn;
+    return window.Store.Conn || document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.memoizedProps.children[5].props.conn;
 };
 
+/**
+ * Get wap functions
+ * @constructor
+ */
+window.WAPI.GetWap = function(){
+    return window.Store.Wap || {}
+};
 
 
 window.WAPI._serializeRawObj = (obj) => {
@@ -762,7 +828,7 @@ window.WAPI.getBatteryLevel = function (done) {
 };
 
 window.WAPI.leaveGroup = function (groupId, done) {
-    Store.Wap.leaveGroup(groupId);
+    window.WAPI.GetWap.leaveGroup(groupId);
     if (done !== undefined) {
         done();
     }
@@ -772,7 +838,7 @@ window.WAPI.leaveGroup = function (groupId, done) {
 window.WAPI.deleteConversation = function (chatId, done) {
     let conversation = window.WAPI.getChatModels().find((chat) => chat.id === chatId);
     let lastReceivedKey = conversation.__x_lastReceivedKey;
-    Store.Wap.sendConversationDelete(chatId, lastReceivedKey).then(
+    window.WAPI.GetWap.sendConversationDelete(chatId, lastReceivedKey).then(
         function(response){
             if (done !== undefined) {
                 done(response.status);
@@ -802,5 +868,17 @@ window.WAPI.downloadFile = function (url, done) {
     xhr.open("GET", url, true);
     xhr.responseType = 'blob';
     xhr.send(null);
-}
+};
 
+window.WAPI.getStatus = function(done){
+    let status = '';
+    try {
+        let status = window.Store.Status._listeningTo.l8.__x_state;
+    } catch (e) {
+        status = 'API-ERROR'
+    }
+    if (done !== undefined) {
+        done(status);
+    }
+    return status;
+};

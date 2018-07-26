@@ -616,5 +616,19 @@ class WhatsAPIDriver(object):
 
         return unread_messages
 
+    def get_connection_status(self):
+        """
+        Get status of the browser instance.
+        :return:
+        """
+        js_status = self.wapi_functions.getStatus()
+        if js_status in ['CONNECTED']:
+            status = 'RUNNING'
+        elif js_status in ['API-ERROR']:
+            status = 'API-ERROR'
+        else:
+            status = 'ERROR'
+        return status
+
     def quit(self):
         self.driver.quit()
