@@ -871,14 +871,17 @@ window.WAPI.downloadFile = function (url, done) {
 };
 
 window.WAPI.getStatus = function(done){
-    let status = '';
+    let bad_status = 'API-ERROR';
     try {
-        status = window.Store.Status._listeningTo.l8.__x_state;
+        let status = window.Store.Status._listeningTo.l8.__x_state;
+        if (done !== undefined) {
+            done(status);
+        }
+        return status;
     } catch (e) {
-        status = 'API-ERROR'
+        if (done !== undefined) {
+            done(bad_status);
+        }
+        return bad_status
     }
-    if (done !== undefined) {
-        done(status);
-    }
-    return status;
 };
