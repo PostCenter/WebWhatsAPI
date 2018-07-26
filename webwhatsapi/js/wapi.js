@@ -873,7 +873,7 @@ window.WAPI.downloadFile = function (url, done) {
 window.WAPI.getStatus = function(done){
     let status = '';
     try {
-        let status = window.Store.Status._listeningTo.l8.__x_state;
+        status = window.Store.Status._listeningTo.l8.__x_state;
     } catch (e) {
         status = 'API-ERROR'
     }
