@@ -72,7 +72,7 @@ window.WAPI = {
  * @returns {*}
  */
 window.WAPI.getChatModels = function(){
-    return window.Store.Chat || document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.memoizedState.chats;
+    return window.Store.Chat.models || document.querySelector("#app")._reactRootContainer.current.child.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.child.sibling.sibling.sibling.sibling.sibling.child.child.child.child.memoizedState.chats;
 };
 
 /**
