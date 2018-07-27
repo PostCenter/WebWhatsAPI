@@ -238,6 +238,17 @@ class WhatsAPIDriver(object):
 
             self.driver.refresh()
 
+    def get_browser_pid(self):
+        """
+        Method to get the pid of the browser instance.
+        :return:
+        """
+        try:
+            pid = self.driver.service.process.pid
+        except Exception:
+            pid = None
+        return pid
+
     def is_logged_in(self):
         """Returns if user is logged. Can be used if non-block needed for wait_for_login"""
         # self.driver.find_element_by_css_selector(self._SELECTORS['mainPage'])
