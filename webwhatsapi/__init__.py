@@ -487,6 +487,10 @@ class WhatsAPIDriver(object):
             return factory_message(result, self)
         return result
 
+    def chat_send_message_async(self, chat_id, message):
+        result = self.wapi_functions.sendMessageAsync(chat_id, message)
+        return result
+
     def send_message_to_id(self, recipient, message):
         return self.wapi_functions.sendMessageToID(recipient, message)
 

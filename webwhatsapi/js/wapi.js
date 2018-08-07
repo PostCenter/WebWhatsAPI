@@ -580,7 +580,7 @@ window.WAPI.sendMessageToID = function (id, message, done) {
         return false;
 
     return true;
-}
+};
 
 window.WAPI.sendMessage = function (id, message, done) {
     const Chats = window.WAPI.getChatModels();
@@ -627,6 +627,25 @@ window.WAPI.sendMessage = function (id, message, done) {
                 Chats[chat].sendMessage(message);
                 return true;
             }
+        }
+    }
+};
+
+window.WAPI.sendMessageAsync = function (id, message, done) {
+    const Chats = window.WAPI.getChatModels();
+
+    for (const chat in Chats) {
+        if (isNaN(chat)) {
+            continue;
+        }
+
+        let temp = {};
+        temp.name = Chats[chat].__x__formattedTitle;
+        temp.id = Chats[chat].__x_id;
+        if (temp.id === id) {
+            Chats[chat].sendMessage(message);
+            done(true);
+            return true;
         }
     }
 };
