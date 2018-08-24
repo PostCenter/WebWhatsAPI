@@ -592,7 +592,7 @@ window.WAPI.sendMessage = function (id, message, done) {
 
         let temp = {};
         temp.name = Chats[chat].__x__formattedTitle;
-        temp.id = Chats[chat].__x_id;
+        temp.id = Chats[chat].__x_id._serialized;
         if (temp.id === id) {
             if (done !== undefined) {
                 Chats[chat].sendMessage(message).then(function () {
@@ -641,7 +641,7 @@ window.WAPI.sendMessageAsync = function (id, message, done) {
 
         let temp = {};
         temp.name = Chats[chat].__x__formattedTitle;
-        temp.id = Chats[chat].__x_id;
+        temp.id = Chats[chat].__x_id._serialized;
         if (temp.id === id) {
             Chats[chat].sendMessage(message);
             done(true);
@@ -661,7 +661,7 @@ window.WAPI.sendSeen = function (id, done) {
 
         let temp = {};
         temp.name = Chats[chat].__x__formattedTitle;
-        temp.id = Chats[chat].__x_id;
+        temp.id = Chats[chat].__x_id._serialized;
         if (temp.id === id) {
             if (done !== undefined) {
                 Chats[chat].sendSeen(false).then(function () {
