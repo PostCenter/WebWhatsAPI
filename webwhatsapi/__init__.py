@@ -133,6 +133,7 @@ class WhatsAPIDriver(object):
                         pass
                 shutil.move(tmp_path, self._profile_path)
             else:
+                shutil.rmtree(tmp_path)
                 raise WhatsAPIException("Missing tmp firefox profile.")
 
         else:
