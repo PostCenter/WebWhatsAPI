@@ -116,14 +116,25 @@ class WhatsAPIDriver(object):
         self.logger.info("Saving profile from %s to %s" % (self._profile.path, self._profile_path))
 
         if remove_old:
-            if os.path.exists(self._profile_path):
-                try:
-                    shutil.rmtree(self._profile_path)
-                except OSError:
-                    pass
+            tmp_path = "{}__tmp".format(self._profile_path)
 
-            shutil.copytree(os.path.join(self._profile.path), self._profile_path,
-                            ignore=shutil.ignore_patterns("parent.lock", "lock", ".parentlock"))
+            shutil.copytree(
+                os.path.join(self._profile.path), tmp_path,
+                ignore=shutil.ignore_patterns(
+                    "parent.lock", "lock", ".parentlock"
+                )
+            )
+
+            if os.path.exists(tmp_path) and len(os.listdir(tmp_path)) > 0:
+                if os.path.exists(self._profile_path):
+                    try:
+                        shutil.rmtree(self._profile_path)
+                    except OSError:
+                        pass
+                shutil.move(tmp_path, self._profile_path)
+            else:
+                raise WhatsAPIException("Missing tmp firefox profile.")
+
         else:
             for item in os.listdir(self._profile.path):
                 if item in ["parent.lock", "lock", ".parentlock"]:
