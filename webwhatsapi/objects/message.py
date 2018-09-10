@@ -56,13 +56,12 @@ class Message(WhatsappObject):
         self.sender = Contact(js_obj["sender"], driver) if js_obj["sender"] else False
         self.timestamp = datetime.fromtimestamp(js_obj["timestamp"])
         self.chat_id = js_obj['chatId']
-
-        logger.error(json.dumps(js_obj))
         if js_obj["content"]:
             self.content = js_obj["content"]
             self.safe_content = safe_str(self.content[0:25]) + '...'
         else:
             logger.error("UNKNOWN MESSAGE TYPE")
+            logger.error(json.dumps(js_obj))
 
     def __repr__(self):
         return "<Message - from {sender} at {timestamp}: {content}>".format(
