@@ -1,4 +1,6 @@
+import json
 import mimetypes
+import logging
 from base64 import b64decode
 from datetime import datetime
 
@@ -7,6 +9,9 @@ import os
 from webwhatsapi.helper import safe_str
 from webwhatsapi.objects.contact import Contact
 from webwhatsapi.objects.whatsapp_object import WhatsappObject
+
+
+logger = logging.getLogger("driver-wapi")
 
 
 def getContacts(x, driver):
@@ -52,9 +57,12 @@ class Message(WhatsappObject):
         self.timestamp = datetime.fromtimestamp(js_obj["timestamp"])
         self.chat_id = js_obj['chatId']
 
+        logger.error(json.dumps(js_obj))
         if js_obj["content"]:
             self.content = js_obj["content"]
             self.safe_content = safe_str(self.content[0:25]) + '...'
+        else:
+            logger.error("UNKNOWN MESSAGE TYPE")
 
     def __repr__(self):
         return "<Message - from {sender} at {timestamp}: {content}>".format(
