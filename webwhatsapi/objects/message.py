@@ -62,6 +62,8 @@ class Message(WhatsappObject):
         else:
             logger.error("UNKNOWN MESSAGE TYPE")
             logger.error(json.dumps(js_obj))
+            self.content = 'NOT SUPPORTED CONTENT'
+            self.safe_content = 'NOT SUPPORTED CONTENT'
 
     def __repr__(self):
         return "<Message - from {sender} at {timestamp}: {content}>".format(
