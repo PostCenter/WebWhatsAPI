@@ -631,6 +631,10 @@ window.WAPI.sendMessage = function (id, message, done) {
     }
 };
 
+window.WAPI.sendMessageAsyncAux = async function (chat, message) {
+    chat.sendMessage(message);
+};
+
 window.WAPI.sendMessageAsync = function (id, message, done) {
     const Chats = window.WAPI.getChatModels();
 
@@ -643,7 +647,7 @@ window.WAPI.sendMessageAsync = function (id, message, done) {
         temp.name = Chats[chat].__x__formattedTitle;
         temp.id = Chats[chat].__x_id._serialized;
         if (temp.id === id) {
-            Chats[chat].sendMessage(message);
+            window.WAPI.sendMessageAsyncAux(Chats[chat], message);
             done(true);
             return true;
         }
