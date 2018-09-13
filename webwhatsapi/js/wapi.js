@@ -631,11 +631,7 @@ window.WAPI.sendMessage = function (id, message, done) {
     }
 };
 
-window.WAPI.sendMessageAsyncAux = async function (chat, message) {
-    chat.sendMessage(message);
-};
-
-window.WAPI.sendMessageAsync = function (id, message, done) {
+window.WAPI.sendMessageAsyncAux = async function (id, message) {
     const Chats = window.WAPI.getChatModels();
 
     for (const chat in Chats) {
@@ -648,10 +644,15 @@ window.WAPI.sendMessageAsync = function (id, message, done) {
         temp.id = Chats[chat].__x_id._serialized;
         if (temp.id === id) {
             window.WAPI.sendMessageAsyncAux(Chats[chat], message);
-            done(true);
             return true;
         }
     }
+};
+
+window.WAPI.sendMessageAsync = function (id, message, done) {
+    window.WAPI.sendMessageAsyncAux(id, message);
+    done(true);
+    return true;
 };
 
 
