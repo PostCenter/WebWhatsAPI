@@ -397,7 +397,9 @@ class WhatsAPIDriver(object):
         :return: List of messages in chat
         :rtype: list[Message]
         """
-        message_objs = self.wapi_functions.getAllMessagesInChat(chat.id, include_me, include_notifications)
+        message_objs = self.wapi_functions.getAllMessagesInChat(
+            chat.get_id(), include_me, include_notifications
+        )
 
         messages = []
         for message in message_objs:
@@ -416,7 +418,9 @@ class WhatsAPIDriver(object):
         :return: List of message ids in chat
         :rtype: list[str]
         """
-        return self.wapi_functions.getAllMessageIdsInChat(chat.id, include_me, include_notifications)
+        return self.wapi_functions.getAllMessageIdsInChat(
+            chat.get_id(), include_me, include_notifications
+        )
 
     def get_message_by_id(self, message_id):
         """
@@ -462,7 +466,7 @@ class WhatsAPIDriver(object):
         :rtype: Chat
         """
         for chat in self.get_all_chats():
-            if not isinstance(chat, UserChat) or number not in chat.id:
+            if not isinstance(chat, UserChat) or number not in chat.get_id():
                 continue
             return chat
 
