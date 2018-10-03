@@ -68,6 +68,9 @@ class WhatsappObjectWithId(WhatsappObject):
         """
         super(WhatsappObjectWithId, self).__init__(js_obj, driver)
         self.id = js_obj["id"]
+        if isinstance(self.id, dict):
+            self.id = self.id.get('_serialized', None)
+
         self.name = js_obj["name"]
 
     def __hash__(self):
