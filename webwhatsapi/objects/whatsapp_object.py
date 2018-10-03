@@ -71,7 +71,13 @@ class WhatsappObjectWithId(WhatsappObject):
         self.name = js_obj["name"]
 
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.get_id())
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.get_id() == other.get_id()
+
+    def get_id(self):
+        if isinstance(self.id, dict):
+            return self.id.get('_serialized', None)
+        else:
+            return self.id

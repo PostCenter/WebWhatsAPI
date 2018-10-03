@@ -24,20 +24,20 @@ class Chat(WhatsappObjectWithId):
 
     @driver_needed
     def send_message(self, message):
-        return self.driver.chat_send_message(self.id, message)
+        return self.driver.chat_send_message(self.get_id(), message)
 
     @driver_needed
     def send_seen(self):
-        return self.driver.chat_send_seen(self.id)
+        return self.driver.chat_send_seen(self.get_id())
 
     def get_messages(self, include_me=False, include_notifications=False):
-        return list(self.driver.chat_get_messages(self.id, include_me, include_notifications))
+        return list(self.driver.chat_get_messages(self.get_id(), include_me, include_notifications))
 
     def load_earlier_messages(self):
-        self.driver.chat_load_earlier_messages(self.id)
+        self.driver.chat_load_earlier_messages(self.get_id())
 
     def load_all_earlier_messages(self):
-        self.driver.chat_load_all_earlier_messages(self.id)
+        self.driver.chat_load_all_earlier_messages(self.get_id())
 
     def load_earlier_messages_till(self, last):
         """
@@ -49,7 +49,9 @@ class Chat(WhatsappObjectWithId):
         :rtype: None
         """
         timestamp = time.mktime(last.timetuple())
-        self.driver.wapi_functions.loadEarlierMessagesTillDate(self.id, timestamp)
+        self.driver.wapi_functions.loadEarlierMessagesTillDate(
+            self.get_id(), timestamp
+        )
 
 
 class UserChat(Chat):
@@ -61,7 +63,7 @@ class UserChat(Chat):
 
         return "<User chat - {name}: {id}>".format(
             name=safe_name,
-            id=self.id)
+            id=self.get_id())
 
 
 class BroadcastChat(Chat):
@@ -72,7 +74,7 @@ class BroadcastChat(Chat):
         safe_name = safe_str(self.name)
         return "<Broadcast chat - {name}: {id}>".format(
             name=safe_name,
-            id=self.id)
+            id=self.get_id())
 
 
 class GroupChat(Chat):
@@ -81,19 +83,19 @@ class GroupChat(Chat):
 
     @driver_needed
     def get_participants_ids(self):
-        return self.driver.wapi_functions.getGroupParticipantIDs(self.id)
+        return self.driver.wapi_functions.getGroupParticipantIDs(self.get_id())
 
     @driver_needed
     def get_participants(self):
-        return list(self.driver.group_get_participants(self.id))
+        return list(self.driver.group_get_participants(self.get_id()))
 
     @driver_needed
     def get_admins(self):
-        return list(self.driver.group_get_admins(self.id))
+        return list(self.driver.group_get_admins(self.get_id()))
 
     def __repr__(self):
         safe_name = safe_str(self.name)
         return "<Group chat - {name}: {id}, {participants} participants>".format(
             name=safe_name,
-            id=self.id,
+            id=self.get_id(),
             participants=len(self.get_participants_ids()))

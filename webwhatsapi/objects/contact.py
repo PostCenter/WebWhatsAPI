@@ -24,11 +24,11 @@ class Contact(WhatsappObjectWithId):
 
     @driver_needed
     def get_common_groups(self):
-        return list(self.driver.contact_get_common_groups(self.id))
+        return list(self.driver.contact_get_common_groups(self.get_id()))
 
     @driver_needed
     def get_chat(self):
-        return self.driver.get_chat_from_id(self.id)
+        return self.driver.get_chat_from_id(self.get_id())
 
     def get_safe_name(self):
         """
@@ -47,4 +47,4 @@ class Contact(WhatsappObjectWithId):
 
     def __repr__(self):
         safe_name = self.get_safe_name()
-        return "<Contact {0} ({1})>".format(safe_name, self.id)
+        return "<Contact {0} ({1})>".format(safe_name, self.get_id())
