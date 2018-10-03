@@ -643,7 +643,7 @@ window.WAPI.sendMessageAsyncAux = async function (id, message) {
         temp.name = Chats[chat].__x__formattedTitle;
         temp.id = Chats[chat].__x_id._serialized;
         if (temp.id === id) {
-            window.WAPI.sendMessageAsyncAux(Chats[chat], message);
+            Chats[chat].sendMessage(message);
             return true;
         }
     }
