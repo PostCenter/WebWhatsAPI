@@ -14,7 +14,8 @@ if (!window.Store) {
                 { id: "WapDelete", conditions: (module) => (module.sendConversationDelete && module.sendConversationDelete.length == 2) ? module : null },
                 { id: "Conn", conditions: (module) => (module.default && module.default.ref && module.default.refTTL) ? module.default : null },
                 { id: "WapQuery", conditions: (module) => (module.queryExist) ? module : null },
-                { id: "ProtoConstructor", conditions: (module) => (module.prototype && module.prototype.constructor.toString().indexOf('binaryProtocol deprecated version') >= 0) ? module : null }
+                { id: "ProtoConstructor", conditions: (module) => (module.prototype && module.prototype.constructor.toString().indexOf('binaryProtocol deprecated version') >= 0) ? module : null },
+                { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null }
             ];
 
             for (let idx in modules) {
@@ -575,6 +576,44 @@ window.WAPI.getMessageById = function (id, done) {
     }
 };
 
+window.WAPI.sendMessageToID = function (id, message, done) {
+    try {
+        var idUser = new window.Store.UserConstructor(id);
+        // create new chat
+        return Store.Chat.find(idUser).then((chat) => {
+            if (done !== undefined) {
+                chat.sendMessage(message).then(function () {
+                    done(true);
+                });
+                return true;
+            } else {
+                chat.sendMessage(message);
+                return true;
+            }
+        });
+    } catch (e) {
+        if (window.Store.Chat.length === 0)
+            return false;
+
+        firstChat = Store.Chat.models[0];
+        var originalID = firstChat.id;
+        firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id);
+        if (done !== undefined) {
+            firstChat.sendMessage(message).then(function () {
+                firstChat.id = originalID;
+                done(true);
+            });
+            return true;
+        } else {
+            firstChat.sendMessage(message);
+            firstChat.id = originalID;
+            return true;
+        }
+    }
+    if (done !== undefined) done(false);
+    return false;
+}
+
 window.WAPI.sendMessage = function (id, message, done) {
     const Chats = window.WAPI.getChatModels();
 
@@ -907,4 +946,4 @@ window.WAPI.getStatus = function(done){
         }
         return bad_status
     }
-};
+}; 
