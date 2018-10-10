@@ -286,7 +286,7 @@ class WhatsAPIDriver(object):
         if filename is None:
             fd, fn_png = tempfile.mkstemp(prefix=self.username, suffix='.png')
         else:
-            fd = os.open(filename, os.O_RDWR | os.CREAT)
+            fd = os.open(filename, os.O_RDWR | os.O_CREAT)
             fn_png = os.path.abspath(filename)
         self.logger.debug("QRcode image saved at %s" % fn_png)
         qr.screenshot(fn_png)
