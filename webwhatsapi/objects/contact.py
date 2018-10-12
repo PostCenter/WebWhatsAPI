@@ -17,10 +17,13 @@ class Contact(WhatsappObjectWithId):
         :type driver: WhatsAPIDriver
         """
         super(Contact, self).__init__(js_obj, driver)
-        self.short_name = js_obj["shortName"]
-        self.push_name = js_obj["pushname"]
-        self.formatted_name = js_obj["formattedName"]
-        self.is_me = js_obj["isMe"]
+        self.short_name = js_obj.get("shortName", None)
+        self.push_name = js_obj.get("pushname", None)
+        self.formatted_name = js_obj.get("formattedName", None)
+        self.is_me = js_obj.get("isMe", False)
+        self.profile_pic = js_obj.get(
+            "profilePicThumbObj", {}
+        ).get('eurl', None)
 
     @driver_needed
     def get_common_groups(self):
