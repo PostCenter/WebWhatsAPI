@@ -742,6 +742,40 @@ window.WAPI.sendMedia = function (mediaBase64, chat_id, filename, caption, done)
     });
 };
 
+window.WAPI.sendMediaAsync = function (
+    mediaBase64, chat_id, filename, caption, url_fallback, done
+) {
+    window.WAPI.sendMediaAsyncAux(
+        mediaBase64, chat_id, filename, caption, url_fallback
+    );
+    done(true);
+    return true;
+};
+
+window.WAPI.sendMediaAsyncAux = async function (
+    mediaBase64, chat_id, filename, caption, url_fallback
+) {
+	let idUser = new window.Store.UserConstructor(chat_id);
+	// create new chat
+	return Store.Chat.find(idUser).then((chat) => {
+	    let mediaBlob;
+	    try {
+            mediaBlob = window.WAPI.base64MediaToFile(mediaBase64, filename);
+        }
+        catch (e) {
+            window.WAPI.sendMessageAsyncAux(chat_id, url_fallback);
+            return;
+        }
+        let mc = new Store.MediaCollection();
+        mc.processFiles([mediaBlob], chat, 1).then(() => {
+            let media = mc.models[0];
+            media.sendToChat(chat, {caption: caption});
+        }).catch((err) => {
+            window.WAPI.sendMessageAsyncAux(chat_id, url_fallback);
+        });
+    });
+};
+
 window.WAPI.base64MediaToFile = function (b64Data, filename) {
     let arr = b64Data.split(','), mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);

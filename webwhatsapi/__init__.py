@@ -520,6 +520,14 @@ class WhatsAPIDriver(object):
         )
         return result
 
+    def chat_send_media_async(
+            self, chat_id, media_base_64, filename, caption, url_fallback
+    ):
+        result = self.wapi_functions.sendMediaAsync(
+            media_base_64, chat_id, filename, caption, url_fallback
+        )
+        return result
+
     def chat_get_messages(self, chat_id, include_me=False, include_notifications=False):
         message_objs = self.wapi_functions.getAllMessagesInChat(chat_id, include_me, include_notifications)
         for message in message_objs:
