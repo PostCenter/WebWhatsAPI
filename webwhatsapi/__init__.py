@@ -566,9 +566,9 @@ class WhatsAPIDriver(object):
     def download_file(self, url):
         return b64decode(self.wapi_functions.downloadFile(url))
 
-    def download_media(self, media_msg):
+    def download_media(self, media_msg, download_preview=False):
         try:
-            if media_msg.content:
+            if media_msg.content and download_preview:
                 return BytesIO(b64decode(media_msg.content))
         except AttributeError:
             pass
