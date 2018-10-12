@@ -723,12 +723,21 @@ window.WAPI.sendMedia = function (mediaBase64, chat_id, filename, caption, done)
 	let idUser = new window.Store.UserConstructor(chat_id);
 	// create new chat
 	return Store.Chat.find(idUser).then((chat) => {
-        let mediaBlob = window.WAPI.base64MediaToFile(mediaBase64, filename);
+	    let mediaBlob;
+	    try {
+            mediaBlob = window.WAPI.base64MediaToFile(mediaBase64, filename);
+        }
+        catch (e) {
+            if (done !== undefined) done(false);
+            return;
+        }
         let mc = new Store.MediaCollection();
         mc.processFiles([mediaBlob], chat, 1).then(() => {
             let media = mc.models[0];
             media.sendToChat(chat, {caption: caption});
             if (done !== undefined) done(true);
+        }).catch((err) => {
+            if (done !== undefined) done(false);
         });
     });
 };
