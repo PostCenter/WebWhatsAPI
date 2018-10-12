@@ -569,7 +569,7 @@ class WhatsAPIDriver(object):
     def download_media(self, media_msg):
         try:
             if media_msg.content:
-                return BytesIO(b64decode(self.content))
+                return BytesIO(b64decode(media_msg.content))
         except AttributeError:
             pass
 
