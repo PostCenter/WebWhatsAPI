@@ -60,8 +60,8 @@ class Message(WhatsappObject):
             self.content = js_obj["content"]
             self.safe_content = safe_str(self.content[0:25]) + '...'
         else:
-            logger.error("UNKNOWN MESSAGE TYPE")
-            logger.error(json.dumps(js_obj))
+            logger.info("NON TEXT MESSAGE TYPE")
+            logger.info(json.dumps(js_obj))
             self.content = 'NOT SUPPORTED CONTENT'
             self.safe_content = 'NOT SUPPORTED CONTENT'
 
