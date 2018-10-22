@@ -5,6 +5,7 @@ from base64 import b64decode
 from datetime import datetime
 
 import os
+from enum import Enum
 
 from webwhatsapi.helper import safe_str
 from webwhatsapi.objects.contact import Contact
@@ -56,6 +57,13 @@ class Message(WhatsappObject):
         self.sender = Contact(js_obj["sender"], driver) if js_obj["sender"] else False
         self.timestamp = datetime.fromtimestamp(js_obj["timestamp"])
         self.chat_id = js_obj['chatId']
+
+        try:
+            status = MessageStatus(js_obj.get('ack', 0))
+        except ValueError:
+            status = MessageStatus.ERROR
+
+        self.read_status = status
         if js_obj["content"]:
             self.content = js_obj["content"]
             self.safe_content = safe_str(self.content[0:25]) + '...'
@@ -219,3 +227,11 @@ class MessageGroup(object):
             num=len(self.messages),
             messages="message" if len(self.messages) == 1 else "messages",
             chat=safe_chat_name)
+
+
+class MessageStatus(Enum):
+    ERROR = -1
+    SENDING = 0
+    SENT = 1
+    RECEIVED = 2
+    READ = 3
