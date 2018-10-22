@@ -304,6 +304,21 @@ window.WAPI.getChatById = function (id, done) {
     }
 };
 
+window.WAPI.existsChatId = function(id, done){
+    let found = window.WAPI.getChat(id);
+    if (found) {
+        found = true;
+    }
+    else {
+        found = false;
+    }
+
+    if (done !== undefined) {
+        done(found);
+    }
+    return found;
+};
+
 
 /**
  * Load more messages in chat object from store by ID

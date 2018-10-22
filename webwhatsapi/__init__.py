@@ -496,6 +496,10 @@ class WhatsAPIDriver(object):
         for group in self.wapi_functions.getCommonGroups(contact_id):
             yield factory_chat(group, self)
 
+    def chat_exists(self, chat_id):
+        result = self.wapi_functions.existsChatId(chat_id)
+        return result
+
     def chat_send_message_to_new(self, chat_id, message):
         result = self.wapi_functions.sendMessageToID(chat_id, message)
         return result
