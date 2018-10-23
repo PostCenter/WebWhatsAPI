@@ -60,7 +60,8 @@ class Message(WhatsappObject):
 
         try:
             status = MessageStatus(js_obj.get('ack', 0))
-        except ValueError:
+        except ValueError as e:
+            logger.error(str(e), exc_info=True)
             status = MessageStatus.ERROR
 
         self.read_status = status
