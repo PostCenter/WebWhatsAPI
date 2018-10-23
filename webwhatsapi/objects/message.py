@@ -230,7 +230,8 @@ class MessageGroup(object):
 
 
 class MessageStatus(Enum):
-    ERROR = -1
+    ERROR = -2
+    RECEIVED_BY_ME = -1
     SENDING = 0
     SENT = 1
     RECEIVED = 2
