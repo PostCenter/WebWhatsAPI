@@ -64,7 +64,7 @@ class Message(WhatsappObject):
             logger.error(str(e), exc_info=True)
             status = MessageStatus.ERROR
 
-        self.read_status = status
+        self.lecture_status = status
         if js_obj["content"]:
             self.content = js_obj["content"]
             self.safe_content = safe_str(self.content[0:25]) + '...'
