@@ -665,7 +665,7 @@ window.WAPI.sendMessage = function (id, message, done) {
                             done(true);
                             return;
                         }
-                        sleep(500).then(check);
+                        sleep(100).then(check);
                     }
                     check();
                 });
