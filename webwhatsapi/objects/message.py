@@ -24,19 +24,16 @@ def getContacts(x, driver):
 
 
 def factory_message(js_obj, driver):
-    if js_obj["lat"] and js_obj["lng"]:
+    if js_obj.get("lat") and js_obj.get("lng"):
         return GeoMessage(js_obj, driver)
 
-    if js_obj["isMedia"]:
+    if js_obj.get("isMedia") or js_obj.get("isMMS"):
         return MediaMessage(js_obj, driver)
 
-    if js_obj["isNotification"]:
+    if js_obj.get("isNotification"):
         return NotificationMessage(js_obj, driver)
 
-    if js_obj["isMMS"]:
-        return MMSMessage(js_obj, driver)
-
-    if js_obj["type"] in ["vcard", "multi_vcard"]:
+    if js_obj.get("type") in ["vcard", "multi_vcard"]:
         return VCardMessage(js_obj, driver)
 
     return Message(js_obj, driver)
@@ -240,3 +237,4 @@ class MessageStatus(Enum):
     SENT = 1
     RECEIVED = 2
     READ = 3
+    VOICE_MESSAGE_RECEIVED = 4
