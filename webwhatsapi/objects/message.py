@@ -62,6 +62,7 @@ class Message(WhatsappObject):
             status = MessageStatus.ERROR
 
         self.lecture_status = status
+        self.text = ""
         if js_obj["text"]:
             self.text = js_obj["text"]
 
