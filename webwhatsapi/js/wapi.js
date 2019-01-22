@@ -703,7 +703,6 @@ window.WAPI.sendMessageAsync = function (id, message, done) {
     return true;
 };
 
-
 window.WAPI.sendSeen = function (id, done) {
     const Chats = window.WAPI.getChatModels();
 
@@ -854,7 +853,6 @@ window.WAPI.getAllLatestMessages = function(includeMe,
     return output;
 
 };
-
 
 window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done) {
     const chats = window.WAPI.getChatModels();
