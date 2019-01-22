@@ -156,6 +156,7 @@ window.WAPI._serializeMessageObj = (obj) => {
         sender: obj["senderObj"]?WAPI._serializeContactObj(obj["senderObj"]): null,
         timestamp: obj["t"],
         content: obj["body"],
+        text: obj["caption"]?"caption" in obj:obj["body"],
         isGroupMsg: obj.isGroupMsg,
         isLink: obj.isLink,
         isMMS: obj.isMMS,
