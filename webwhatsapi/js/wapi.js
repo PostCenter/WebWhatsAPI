@@ -156,6 +156,7 @@ window.WAPI._serializeMessageObj = (obj) => {
         sender: obj["senderObj"]?WAPI._serializeContactObj(obj["senderObj"]): null,
         timestamp: obj["t"],
         content: obj["body"],
+        text: "caption" in obj?obj["caption"]: obj["body"],
         isGroupMsg: obj.isGroupMsg,
         isLink: obj.isLink,
         isMMS: obj.isMMS,
@@ -702,7 +703,6 @@ window.WAPI.sendMessageAsync = function (id, message, done) {
     return true;
 };
 
-
 window.WAPI.sendSeen = function (id, done) {
     const Chats = window.WAPI.getChatModels();
 
@@ -853,7 +853,6 @@ window.WAPI.getAllLatestMessages = function(includeMe,
     return output;
 
 };
-
 
 window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done) {
     const chats = window.WAPI.getChatModels();
