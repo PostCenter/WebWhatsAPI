@@ -863,28 +863,53 @@ window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done)
         }
 
         let messageGroupObj = chats[chat];
-        let messageGroup = WAPI._serializeChatObj(messageGroupObj);
-        messageGroup.messages = [];
+        let messageGroup = WAPI.getChatUnreadMessages(
+            messageGroupObj, includeMe, includeNotifications
+        );
+        if (messageGroup != null){
+            output.push(messageGroup);
+        }
+    }
+    if (done !== undefined) {
+        done(output);
+    }
+    return output;
+};
 
-        const messages = messageGroupObj.msgs.models;
-        for (let i = messages.length - 1; i >= 0; i--) {
-            let messageObj = messages[i];
-            if (messageObj.__x_isNewMsg || messageObj.__x_MustSent) {
-                if(messageObj.__x_isSentByMe && !includeMe) {
-                    break;
-                }
-                let message = WAPI.processMessageObj(messageObj, includeMe,  includeNotifications);
-                if(message){
-                    messageObj.__x_isNewMsg = false;
-                    messageObj.__x_MustSent = false;
-                    messageGroup.messages.unshift(message);
-                }
-            } else {
+window.WAPI.getChatUnreadMessages = function (chat, includeMe, includeNotifications) {
+    let messageGroup = WAPI._serializeChatObj(chat);
+    messageGroup.messages = [];
+
+    const messages = chat.msgs.models;
+    for (let i = messages.length - 1; i >= 0; i--) {
+        let messageObj = messages[i];
+        if (messageObj.__x_isNewMsg || messageObj.__x_MustSent) {
+            if(messageObj.__x_isSentByMe && !includeMe) {
                 break;
             }
+            let message = WAPI.processMessageObj(messageObj, includeMe,  includeNotifications);
+            if(message){
+                messageObj.__x_isNewMsg = false;
+                messageObj.__x_MustSent = false;
+                messageGroup.messages.unshift(message);
+            }
+        } else {
+            break;
         }
+    }
 
-        if (messageGroup.messages.length > 0) {
+    if (messageGroup.messages.length > 0) {
+        return messageGroup;
+    }
+    return null;
+};
+
+window.WAPI.getUnreadMessagesUsingChatId = function(chat_id, done){
+    let output = [];
+    let chat = window.WAPI.getChat(chat_id, undefined);
+    if (chat) {
+        let messageGroup = window.WAPI.getChatUnreadMessages(chat, false, false);
+        if (messageGroup != null){
             output.push(messageGroup);
         }
     }
