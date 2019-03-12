@@ -338,8 +338,8 @@ class WhatsAPIDriver(object):
         return self.wapi_functions.getAllChatIds()
 
     def get_unread(
-            self, include_me=False,
-            include_notifications=False, filter_week=True
+            self, include_me=False, include_notifications=False,
+            filter_week=True, specific_chat=None
     ):
         """
         Fetches unread messages
@@ -350,14 +350,21 @@ class WhatsAPIDriver(object):
         :type include_notifications: bool or None
         :param filter_week: Filter only the last week of messages
         :type filter_week: bool
+        :param specific_chat: Specific chat from where get messages.
+        :type specific_chat: string
         :return: List of unread messages grouped by chats
         :rtype: list[MessageGroup]
         """
 
         seven_days_ago = int((datetime.now() - timedelta(days=7)).timestamp())
-        raw_message_groups = self.wapi_functions.getUnreadMessages(
-            include_me, include_notifications
-        )
+        if specific_chat is None:
+            raw_message_groups = self.wapi_functions.getUnreadMessages(
+                include_me, include_notifications
+            )
+        else:
+            raw_message_groups = self.wapi_functions.getUnreadMessagesUsingChatId(
+                specific_chat, include_me, include_notifications
+            )
 
         unread_messages = []
         for raw_message_group in raw_message_groups:

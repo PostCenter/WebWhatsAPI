@@ -904,11 +904,11 @@ window.WAPI.getChatUnreadMessages = function (chat, includeMe, includeNotificati
     return null;
 };
 
-window.WAPI.getUnreadMessagesUsingChatId = function(chat_id, done){
+window.WAPI.getUnreadMessagesUsingChatId = function(chat_id, includeMe, includeNotifications, done){
     let output = [];
     let chat = window.WAPI.getChat(chat_id, undefined);
     if (chat) {
-        let messageGroup = window.WAPI.getChatUnreadMessages(chat, false, false);
+        let messageGroup = window.WAPI.getChatUnreadMessages(chat, includeMe, includeNotifications);
         if (messageGroup != null){
             output.push(messageGroup);
         }
