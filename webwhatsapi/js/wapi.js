@@ -252,7 +252,7 @@ window.WAPI.getAllChatIds = function (done) {
     if (done !== undefined) {
         done(chatIds);
     } else {
-        return chats;
+        return chatIds;
     }
 };
 
@@ -628,7 +628,32 @@ window.WAPI.sendMessageToID = function (id, message, done) {
     }
     if (done !== undefined) done(false);
     return false;
-}
+};
+
+window.WAPI.forwardMessage = function(idChat, idMessage, waitCheck, done){
+    let chat = Store.Chat.get(idChat);
+    let messageToBeForwarded = Store.Msg.get(idMessage);
+
+    if (chat == null || messageToBeForwarded == null){
+        if (done != null){
+            done(false);
+        }
+        return false;
+    }
+
+    if (done != null && !waitCheck) {
+        chat.forwardMessages([messageToBeForwarded]).then(function(){
+            done(true); // TODO
+        });
+        return true;
+    } else {
+        chat.forwardMessages([messageToBeForwarded]);
+        if (done != null){
+            done(true);
+        }
+        return true;
+    }
+};
 
 window.WAPI.sendMessage = function (id, message, done) {
     const Chats = window.WAPI.getChatModels();
