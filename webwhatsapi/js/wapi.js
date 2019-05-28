@@ -156,6 +156,7 @@ window.WAPI._serializeMessageObj = (obj) => {
         sender: obj["senderObj"]?WAPI._serializeContactObj(obj["senderObj"]): null,
         timestamp: obj["t"],
         content: obj["body"],
+        text: "caption" in obj?obj["caption"]: obj["body"],
         isGroupMsg: obj.isGroupMsg,
         isLink: obj.isLink,
         isMMS: obj.isMMS,
@@ -251,7 +252,7 @@ window.WAPI.getAllChatIds = function (done) {
     if (done !== undefined) {
         done(chatIds);
     } else {
-        return chats;
+        return chatIds;
     }
 };
 
@@ -627,7 +628,32 @@ window.WAPI.sendMessageToID = function (id, message, done) {
     }
     if (done !== undefined) done(false);
     return false;
-}
+};
+
+window.WAPI.forwardMessage = function(idChat, idMessage, waitCheck, done){
+    let chat = Store.Chat.get(idChat);
+    let messageToBeForwarded = Store.Msg.get(idMessage);
+
+    if (chat == null || messageToBeForwarded == null){
+        if (done != null){
+            done(false);
+        }
+        return false;
+    }
+
+    if (done != null && !waitCheck) {
+        chat.forwardMessages([messageToBeForwarded]).then(function(){
+            done(true); // TODO
+        });
+        return true;
+    } else {
+        chat.forwardMessages([messageToBeForwarded]);
+        if (done != null){
+            done(true);
+        }
+        return true;
+    }
+};
 
 window.WAPI.sendMessage = function (id, message, done) {
     const Chats = window.WAPI.getChatModels();
@@ -701,7 +727,6 @@ window.WAPI.sendMessageAsync = function (id, message, done) {
     done(true);
     return true;
 };
-
 
 window.WAPI.sendSeen = function (id, done) {
     const Chats = window.WAPI.getChatModels();
@@ -854,7 +879,6 @@ window.WAPI.getAllLatestMessages = function(includeMe,
 
 };
 
-
 window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done) {
     const chats = window.WAPI.getChatModels();
     let output = [];
@@ -864,28 +888,53 @@ window.WAPI.getUnreadMessages = function (includeMe, includeNotifications, done)
         }
 
         let messageGroupObj = chats[chat];
-        let messageGroup = WAPI._serializeChatObj(messageGroupObj);
-        messageGroup.messages = [];
+        let messageGroup = WAPI.getChatUnreadMessages(
+            messageGroupObj, includeMe, includeNotifications
+        );
+        if (messageGroup != null){
+            output.push(messageGroup);
+        }
+    }
+    if (done !== undefined) {
+        done(output);
+    }
+    return output;
+};
 
-        const messages = messageGroupObj.msgs.models;
-        for (let i = messages.length - 1; i >= 0; i--) {
-            let messageObj = messages[i];
-            if (messageObj.__x_isNewMsg || messageObj.__x_MustSent) {
-                if(messageObj.__x_isSentByMe && !includeMe) {
-                    break;
-                }
-                let message = WAPI.processMessageObj(messageObj, includeMe,  includeNotifications);
-                if(message){
-                    messageObj.__x_isNewMsg = false;
-                    messageObj.__x_MustSent = false;
-                    messageGroup.messages.unshift(message);
-                }
-            } else {
+window.WAPI.getChatUnreadMessages = function (chat, includeMe, includeNotifications) {
+    let messageGroup = WAPI._serializeChatObj(chat);
+    messageGroup.messages = [];
+
+    const messages = chat.msgs.models;
+    for (let i = messages.length - 1; i >= 0; i--) {
+        let messageObj = messages[i];
+        if (messageObj.__x_isNewMsg || messageObj.__x_MustSent) {
+            if(messageObj.__x_isSentByMe && !includeMe) {
                 break;
             }
+            let message = WAPI.processMessageObj(messageObj, includeMe,  includeNotifications);
+            if(message){
+                messageObj.__x_isNewMsg = false;
+                messageObj.__x_MustSent = false;
+                messageGroup.messages.unshift(message);
+            }
+        } else {
+            break;
         }
+    }
 
-        if (messageGroup.messages.length > 0) {
+    if (messageGroup.messages.length > 0) {
+        return messageGroup;
+    }
+    return null;
+};
+
+window.WAPI.getUnreadMessagesUsingChatId = function(chat_id, includeMe, includeNotifications, done){
+    let output = [];
+    let chat = window.WAPI.getChat(chat_id, undefined);
+    if (chat) {
+        let messageGroup = window.WAPI.getChatUnreadMessages(chat, includeMe, includeNotifications);
+        if (messageGroup != null){
             output.push(messageGroup);
         }
     }
