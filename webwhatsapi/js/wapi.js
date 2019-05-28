@@ -1028,3 +1028,11 @@ window.WAPI.getStatus = function(done){
         return bad_status
     }
 }; 
+
+window.WAPI.isLoggedIn = function (done) {
+    // Contact always exists when logged in
+    const isLogged = window.Store.Contact && window.Store.Contact.checksum !== undefined;
+
+    if (done !== undefined) done(isLogged);
+    return isLogged;
+};
