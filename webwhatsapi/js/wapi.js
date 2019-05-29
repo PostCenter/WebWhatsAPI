@@ -597,7 +597,7 @@ window.WAPI.getMessageById = function (id, done) {
 
 window.WAPI.sendMessageToID = function (id, message, done) {
     try {
-        var idUser = new window.Store.UserConstructor(id);
+        var idUser = new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
         // create new chat
         return Store.Chat.find(idUser).then((chat) => {
             if (done !== undefined) {
