@@ -15,7 +15,10 @@ if (!window.Store) {
                 { id: "Conn", conditions: (module) => (module.default && module.default.ref && module.default.refTTL) ? module.default : null },
                 { id: "WapQuery", conditions: (module) => (module.queryExist) ? module : null },
                 { id: "ProtoConstructor", conditions: (module) => (module.prototype && module.prototype.constructor.toString().indexOf('binaryProtocol deprecated version') >= 0) ? module : null },
-                { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null }
+                { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null },
+                { id: "SendTextMsgToChat",conditions: (module) => (module.sendTextMsgToChat) ? module.sendTextMsgToChat : null},
+                { id: "ChatClass",conditions: (module) => (module.default && module.default.prototype && module.default.prototype.Collection !== undefined && module.default.prototype.Collection === "Chat") ? module : null},
+                {id: "SendSeen", conditions: (module) => (module.sendSeen) ? module.sendSeen : null}
             ];
 
             for (let idx in modules) {
@@ -57,7 +60,7 @@ if (!window.Store) {
             }
         }
 
-        webpackJsonp([], {'parasite': (x, y, z) => getStore(z)}, 'parasite');
+        webpackJsonp([], {'parasite': (x, y, z) => getStore(z)}, ['parasite']);
     })();
 }
 
@@ -594,7 +597,7 @@ window.WAPI.getMessageById = function (id, done) {
 
 window.WAPI.sendMessageToID = function (id, message, done) {
     try {
-        var idUser = new window.Store.UserConstructor(id);
+        var idUser = new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
         // create new chat
         return Store.Chat.find(idUser).then((chat) => {
             if (done !== undefined) {
@@ -613,7 +616,7 @@ window.WAPI.sendMessageToID = function (id, message, done) {
 
         firstChat = Store.Chat.models[0];
         var originalID = firstChat.id;
-        firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id);
+        firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
         if (done !== undefined) {
             firstChat.sendMessage(message).then(function () {
                 firstChat.id = originalID;
@@ -760,11 +763,11 @@ window.WAPI.sendSeen = function (id, done) {
 };
 
 window.WAPI.sendMedia = function (mediaBase64, chat_id, filename, caption, done) {
-	let idUser = new window.Store.UserConstructor(chat_id);
-	// create new chat
-	return Store.Chat.find(idUser).then((chat) => {
-	    let mediaBlob;
-	    try {
+    let idUser = new window.Store.UserConstructor(chat_id, {intentionallyUsePrivateConstructor: true});
+    // create new chat
+    return Store.Chat.find(idUser).then((chat) => {
+        let mediaBlob;
+        try {
             mediaBlob = window.WAPI.base64MediaToFile(mediaBase64, filename);
         }
         catch (e) {
@@ -795,11 +798,11 @@ window.WAPI.sendMediaAsync = function (
 window.WAPI.sendMediaAsyncAux = async function (
     mediaBase64, chat_id, filename, caption, url_fallback
 ) {
-	let idUser = new window.Store.UserConstructor(chat_id);
-	// create new chat
-	return Store.Chat.find(idUser).then((chat) => {
-	    let mediaBlob;
-	    try {
+    let idUser = new window.Store.UserConstructor(chat_id, {intentionallyUsePrivateConstructor: true});
+    // create new chat
+    return Store.Chat.find(idUser).then((chat) => {
+        let mediaBlob;
+        try {
             mediaBlob = window.WAPI.base64MediaToFile(mediaBase64, filename);
         }
         catch (e) {
@@ -818,7 +821,7 @@ window.WAPI.sendMediaAsyncAux = async function (
 
 window.WAPI.base64MediaToFile = function (b64Data, filename) {
     let arr = b64Data.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
     while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
     }
@@ -1076,4 +1079,15 @@ window.WAPI.getStatus = function(done){
         }
         return bad_status
     }
-}; 
+};
+
+window.WAPI.isLoggedIn = function (done) {
+    // Contact always exists when logged in
+    const isLogged = window.Store.Contact && window.Store.Contact.checksum !== undefined;
+
+    if (done !== undefined) done(isLogged);
+    return isLogged;
+};
+Store.ChatClass.default.prototype.sendMessage = function (e) {return Store.SendTextMsgToChat(this,e);}
+Store.ChatClass.default.prototype.sendSeen = function (e) {return Store.SendSeen(this,e);}
+
