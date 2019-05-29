@@ -15,7 +15,9 @@ if (!window.Store) {
                 { id: "Conn", conditions: (module) => (module.default && module.default.ref && module.default.refTTL) ? module.default : null },
                 { id: "WapQuery", conditions: (module) => (module.queryExist) ? module : null },
                 { id: "ProtoConstructor", conditions: (module) => (module.prototype && module.prototype.constructor.toString().indexOf('binaryProtocol deprecated version') >= 0) ? module : null },
-                { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null }
+                { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null },
+		{ id: "SendTextMsgToChat",conditions: (module) => (module.sendTextMsgToChat) ? module.sendTextMsgToChat : null},
+                { id: "ChatClass",conditions: (module) => (module.default && module.default.prototype && module.default.prototype.Collection !== undefined && module.default.prototype.Collection === "Chat") ? module : null}
             ];
 
             for (let idx in modules) {
@@ -1085,3 +1087,5 @@ window.WAPI.isLoggedIn = function (done) {
     if (done !== undefined) done(isLogged);
     return isLogged;
 };
+Store.ChatClass.default.prototype.sendMessage = function (e) {Store.SendTextMsgToChat(this,e);}
+
