@@ -1087,5 +1087,5 @@ window.WAPI.isLoggedIn = function (done) {
     if (done !== undefined) done(isLogged);
     return isLogged;
 };
-Store.ChatClass.default.prototype.sendMessage = function (e) {Store.SendTextMsgToChat(this,e);}
+Store.ChatClass.default.prototype.sendMessage = function (e) {return Store.SendTextMsgToChat(this,e);}
 
