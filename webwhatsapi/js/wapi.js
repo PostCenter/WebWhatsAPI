@@ -616,7 +616,7 @@ window.WAPI.sendMessageToID = function (id, message, done) {
 
         firstChat = Store.Chat.models[0];
         var originalID = firstChat.id;
-        firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id);
+        firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
         if (done !== undefined) {
             firstChat.sendMessage(message).then(function () {
                 firstChat.id = originalID;
@@ -763,7 +763,7 @@ window.WAPI.sendSeen = function (id, done) {
 };
 
 window.WAPI.sendMedia = function (mediaBase64, chat_id, filename, caption, done) {
-    let idUser = new window.Store.UserConstructor(chat_id);
+    let idUser = new window.Store.UserConstructor(chat_id, {intentionallyUsePrivateConstructor: true});
     // create new chat
     return Store.Chat.find(idUser).then((chat) => {
         let mediaBlob;
@@ -798,7 +798,7 @@ window.WAPI.sendMediaAsync = function (
 window.WAPI.sendMediaAsyncAux = async function (
     mediaBase64, chat_id, filename, caption, url_fallback
 ) {
-    let idUser = new window.Store.UserConstructor(chat_id);
+    let idUser = new window.Store.UserConstructor(chat_id, {intentionallyUsePrivateConstructor: true});
     // create new chat
     return Store.Chat.find(idUser).then((chat) => {
         let mediaBlob;
