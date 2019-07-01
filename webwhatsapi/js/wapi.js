@@ -10,7 +10,7 @@ if (!window.Store) {
             let neededObjects = [
                 { id: "Store", conditions: (module) => (module.Chat && module.Msg) ? module : null },
                 { id: "Wap", conditions: (module) => (module.createGroup) ? module : null },
-                {id: "MediaCollection", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.processFiles !== undefined) ? module.default : null},
+                { id: "MediaCollection", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.processFiles !== undefined) ? module.default : null},
                 { id: "WapDelete", conditions: (module) => (module.sendConversationDelete && module.sendConversationDelete.length == 2) ? module : null },
                 { id: "Conn", conditions: (module) => (module.default && module.default.ref && module.default.refTTL) ? module.default : null },
                 { id: "WapQuery", conditions: (module) => (module.queryExist) ? module : null },
@@ -18,7 +18,7 @@ if (!window.Store) {
                 { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null },
                 { id: "SendTextMsgToChat",conditions: (module) => (module.sendTextMsgToChat) ? module.sendTextMsgToChat : null},
                 { id: "ChatClass",conditions: (module) => (module.default && module.default.prototype && module.default.prototype.Collection !== undefined && module.default.prototype.Collection === "Chat") ? module : null},
-                {id: "SendSeen", conditions: (module) => (module.sendSeen) ? module.sendSeen : null}
+                { id: "SendSeen", conditions: (module) => (module.sendSeen) ? module.sendSeen : null}
             ];
 
             for (let idx in modules) {
@@ -106,12 +106,12 @@ window.WAPI._serializeRawObj = (obj) => {
 /**
  * Serializes a chat object
  *
- * @param rawChat Chat object
+ * @param obj Raw Chat object
  * @returns {{}}
  */
 
 window.WAPI._serializeChatObj = (obj) => {
-    if (obj == undefined) {
+    if (obj == null) {
         return null;
     }
 
@@ -126,7 +126,7 @@ window.WAPI._serializeChatObj = (obj) => {
 };
 
 window.WAPI._serializeContactObj = (obj) => {
-    if (obj == undefined) {
+    if (obj == null) {
         return null;
     }
 
@@ -145,17 +145,34 @@ window.WAPI._serializeContactObj = (obj) => {
     });
 };
 
-window.WAPI._serializeMessageObj = (obj) => {
-    if (obj == undefined) {
+window.WAPI._serializeQuotedMessage = (obj) => {
+    if (obj == null) {
         return null;
     }
 
-    if (obj.type == 'revoked') {
+    if (obj['quotedMsg'] == null) {
+        return null
+    }
+
+    return {
+            message: obj['quotedMsg'],
+            wsp_mid: obj['quotedStanzaID'],
+            from: obj['quotedParticipant']
+        }
+};
+
+window.WAPI._serializeMessageObj = (obj) => {
+    if (obj == null) {
+        return null;
+    }
+
+    if (obj.type === 'revoked') {
         return null;
     }
 
     return Object.assign(window.WAPI._serializeRawObj(obj), {
         id: obj.id._serialized,
+        wsp_mid: obj.id.id,
         sender: obj["senderObj"]?WAPI._serializeContactObj(obj["senderObj"]): null,
         timestamp: obj["t"],
         content: obj["body"],
@@ -169,7 +186,7 @@ window.WAPI._serializeMessageObj = (obj) => {
         type: obj.type,
         chat: WAPI._serializeChatObj(obj['chat']),
         chatId: obj.id.remote,
-        quotedMsgObj: WAPI._serializeMessageObj(obj['_quotedMsgObj']),
+        quotedMsgObj: WAPI._serializeQuotedMessage(obj),
         mediaData: window.WAPI._serializeRawObj(obj['mediaData'])
     });
 };
@@ -401,10 +418,11 @@ window.WAPI.loadEarlierMessagesTillDate = function (id, lastMessage, done) {
         (chat) => chat.id._serialized === id
     );
     x = function(){
-        if(found.msgs.models.length == 0){
+        const models = found.msgs.models;
+        if(models.length == null || models.length === 0){
             done()
         }
-        else if(found.msgs.models[0].t>lastMessage){
+        else if(models[0].t>lastMessage){
             found.loadEarlierMsgs().then(x);
         }else {
             done();
@@ -597,7 +615,7 @@ window.WAPI.getMessageById = function (id, done) {
 
 window.WAPI.sendMessageToID = function (id, message, done) {
     try {
-        var idUser = new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
+        const idUser = new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
         // create new chat
         return Store.Chat.find(idUser).then((chat) => {
             if (done !== undefined) {
@@ -614,8 +632,8 @@ window.WAPI.sendMessageToID = function (id, message, done) {
         if (window.Store.Chat.length === 0)
             return false;
 
-        firstChat = Store.Chat.models[0];
-        var originalID = firstChat.id;
+        let firstChat = Store.Chat.models[0];
+        const originalID = firstChat.id;
         firstChat.id = typeof originalID === "string" ? id : new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
         if (done !== undefined) {
             firstChat.sendMessage(message).then(function () {
@@ -1088,6 +1106,11 @@ window.WAPI.isLoggedIn = function (done) {
     if (done !== undefined) done(isLogged);
     return isLogged;
 };
-Store.ChatClass.default.prototype.sendMessage = function (e) {return Store.SendTextMsgToChat(this,e);}
-Store.ChatClass.default.prototype.sendSeen = function (e) {return Store.SendSeen(this,e);}
+
+Store.ChatClass.default.prototype.sendMessage = function (e) {
+    return Store.SendTextMsgToChat(this,e);
+};
+Store.ChatClass.default.prototype.sendSeen = function (e) {
+    return Store.SendSeen(this,e);
+};
 
