@@ -509,6 +509,9 @@ class WhatsAPIDriver(object):
 
     def chat_send_message_to_new(self, chat_id, message):
         result = self.wapi_functions.sendMessageToID(chat_id, message)
+
+        if not isinstance(result, bool):
+            return factory_message(result, self)
         return result
 
     def chat_send_message(self, chat_id, message):
