@@ -105,7 +105,11 @@ class WhatsAPIDriver(object):
     _profile = None
 
     def get_local_storage(self):
-        return self.driver.execute_script('return window.localStorage;')
+        local_storage = self.driver.execute_script('return window.localStorage;')
+        escaped = {}
+        for k,v in local_storage.items():
+            escaped[k] = v.encode('unicode-escape').decode('ascii') if type(v) is str else v
+        return escaped
 
     def set_local_storage(self, data):
         self.driver.execute_script(''.join(["window.localStorage.setItem('{}', '{}');".format(k, v)
