@@ -155,10 +155,10 @@ window.WAPI._serializeQuotedMessage = (obj) => {
     }
 
     return {
-            message: obj['quotedMsg'],
-            wsp_mid: obj['quotedStanzaID'],
-            from: obj['quotedParticipant']
-        }
+        message: obj['quotedMsg'],
+        wsp_mid: obj['quotedStanzaID'],
+        from: obj['quotedParticipant']
+    }
 };
 
 window.WAPI._serializeMessageObj = (obj) => {
@@ -613,6 +613,59 @@ window.WAPI.getMessageById = function (id, done) {
     }
 };
 
+window.WAPI.forwardMessage = function(idChat, idMessage, waitCheck, done){
+    let chat = Store.Chat.get(idChat);
+    let messageToBeForwarded = Store.Msg.get(idMessage);
+
+    if (chat == null || messageToBeForwarded == null){
+        if (done != null){
+            done(false);
+        }
+        return false;
+    }
+
+    if (done != null && !waitCheck) {
+        chat.forwardMessages([messageToBeForwarded]).then(function(){
+            done(true); // TODO
+        });
+        return true;
+    } else {
+        chat.forwardMessages([messageToBeForwarded]);
+        if (done != null){
+            done(true);
+        }
+        return true;
+    }
+};
+
+window.WAPI._waitForPublication = function (id, message, done) {
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    let trials = 0;
+
+    function check() {
+        let chat = window.WAPI.getChat(id);
+        for (let i=chat.msgs.models.length - 1; i >= 0; i--) {
+            let msg = chat.msgs.models[i];
+
+            if (!msg.senderObj.isMe || msg.body != message) {
+                continue;
+            }
+            done(WAPI._serializeMessageObj(msg));
+            return true;
+        }
+        trials += 1;
+        if (trials > 30) {
+            done(true);
+            return;
+        }
+        sleep(100).then(check);
+    }
+    check();
+};
+
 window.WAPI.sendMessageToID = function (id, message, done) {
     try {
         const idUser = new window.Store.UserConstructor(id, {intentionallyUsePrivateConstructor: true});
@@ -620,7 +673,7 @@ window.WAPI.sendMessageToID = function (id, message, done) {
         return Store.Chat.find(idUser).then((chat) => {
             if (done !== undefined) {
                 chat.sendMessage(message).then(function () {
-                    done(true);
+                    window.WAPI._waitForPublication(id, message, done);
                 });
                 return true;
             } else {
@@ -651,31 +704,6 @@ window.WAPI.sendMessageToID = function (id, message, done) {
     return false;
 };
 
-window.WAPI.forwardMessage = function(idChat, idMessage, waitCheck, done){
-    let chat = Store.Chat.get(idChat);
-    let messageToBeForwarded = Store.Msg.get(idMessage);
-
-    if (chat == null || messageToBeForwarded == null){
-        if (done != null){
-            done(false);
-        }
-        return false;
-    }
-
-    if (done != null && !waitCheck) {
-        chat.forwardMessages([messageToBeForwarded]).then(function(){
-            done(true); // TODO
-        });
-        return true;
-    } else {
-        chat.forwardMessages([messageToBeForwarded]);
-        if (done != null){
-            done(true);
-        }
-        return true;
-    }
-};
-
 window.WAPI.sendMessage = function (id, message, done) {
     const Chats = window.WAPI.getChatModels();
 
@@ -690,31 +718,7 @@ window.WAPI.sendMessage = function (id, message, done) {
         if (temp.id === id) {
             if (done !== undefined) {
                 Chats[chat].sendMessage(message).then(function () {
-                    function sleep(ms) {
-                        return new Promise(resolve => setTimeout(resolve, ms));
-                    }
-
-                    var trials = 0;
-
-                    function check() {
-                        for (let i=Chats[chat].msgs.models.length - 1; i >= 0; i--) {
-                            let msg = Chats[chat].msgs.models[i];
-
-                            if (!msg.senderObj.isMe || msg.body != message) {
-                                continue;
-                            }
-                            done(WAPI._serializeMessageObj(msg));
-                            return True;
-                        }
-                        trials += 1;
-                        console.log(trials);
-                        if (trials > 30) {
-                            done(true);
-                            return;
-                        }
-                        sleep(100).then(check);
-                    }
-                    check();
+                    window.WAPI._waitForPublication(id, message, done);
                 });
                 return true;
             } else {
