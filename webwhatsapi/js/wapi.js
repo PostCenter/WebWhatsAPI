@@ -18,7 +18,8 @@ if (!window.Store) {
                 { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null },
                 { id: "SendTextMsgToChat",conditions: (module) => (module.sendTextMsgToChat) ? module.sendTextMsgToChat : null},
                 { id: "ChatClass",conditions: (module) => (module.default && module.default.prototype && module.default.prototype.Collection !== undefined && module.default.prototype.Collection === "Chat") ? module : null},
-                { id: "SendSeen", conditions: (module) => (module.sendSeen) ? module.sendSeen : null}
+                { id: "SendSeen", conditions: (module) => (module.sendSeen) ? module.sendSeen : null},
+                { id: "sendDelete", conditions: (module) => (module.sendDelete) ? module.sendDelete : null }
             ];
 
             for (let idx in modules) {
@@ -1054,11 +1055,23 @@ window.WAPI.deleteConversation = function (chatId, done) {
     let conversation = window.WAPI.getChatModels().find(
         (chat) => chat.id._serialized === chatId
     );
-    let lastReceivedKey = conversation.__x_lastReceivedKey;
-    window.WAPI.GetWap().sendConversationDelete(chatId, lastReceivedKey).then(
-        function(response){
-            if (done !== undefined) {
-                done(response.status);
+    if (conversation == null) {
+        if (done != null) {
+            done(false);
+        }
+        return false;
+    }
+
+    window.Store.sendDelete(conversation, false).then(
+        () => {
+            if (done != null) {
+                done(true);
+            }
+        }
+    ).catch(
+        () => {
+            if (done != null) {
+                done(false);
             }
         }
     );
