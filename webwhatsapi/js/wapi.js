@@ -17,7 +17,8 @@ if (!window.Store) {
                 { id: "ProtoConstructor", conditions: (module) => (module.prototype && module.prototype.constructor.toString().indexOf('binaryProtocol deprecated version') >= 0) ? module : null },
                 { id: "UserConstructor", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.isServer && module.default.prototype.isUser) ? module.default : null },
                 { id: "SendTextMsgToChat",conditions: (module) => (module.sendTextMsgToChat) ? module.sendTextMsgToChat : null},
-                { id: "ChatClass",conditions: (module) => (module.default && module.default.prototype && module.default.prototype.Collection !== undefined && module.default.prototype.Collection === "Chat") ? module : null},
+                //{ id: "ChatClass",conditions: (module) => (module.default && module.default.prototype && module.default.prototype.Collection !== undefined && module.default.prototype.Collection === "Chat") ? module : null},
+                { id: "ChatClass", conditions: (module) => (module.CHAT_KIND) ? module : null},
                 { id: "SendSeen", conditions: (module) => (module.sendSeen) ? module.sendSeen : null},
                 { id: "sendDelete", conditions: (module) => (module.sendDelete) ? module.sendDelete : null }
             ];
