@@ -798,7 +798,7 @@ window.WAPI.sendMedia = function (mediaBase64, chat_id, filename, caption, done)
             if (done !== undefined) done(false);
             return;
         }
-        let mc = new window.Store.MediaCollection({chatParticipantCount: 0});
+        let mc = new Store.MediaCollection({chatParticipantCount: 0});
         mc.processFiles([mediaBlob], chat, 1).then(() => {
             let media = mc.models[0];
             media.sendToChat(chat, {caption: caption});
