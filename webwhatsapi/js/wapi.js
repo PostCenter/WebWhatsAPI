@@ -8,7 +8,8 @@ if (!window.Store) {
         function getStore(modules) {
             let foundCount = 0;
             let neededObjects = [
-                { id: "Store", conditions: (module) => (module.Chat && module.Msg) ? module : null },
+                //{ id: "Store", conditions: (module) => (module.Chat && module.Msg) ? module : null },
+                { id: "Store", conditions: (module) => (module.default && module.default.Chat && module.default.Msg) ? module.default : null},
                 { id: "Wap", conditions: (module) => (module.createGroup) ? module : null },
                 { id: "MediaCollection", conditions: (module) => (module.default && module.default.prototype && module.default.prototype.processAttachments) ? module.default : null },
                 { id: "WapDelete", conditions: (module) => (module.sendConversationDelete && module.sendConversationDelete.length == 2) ? module : null },
