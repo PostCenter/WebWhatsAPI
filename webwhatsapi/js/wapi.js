@@ -1136,10 +1136,10 @@ window.WAPI.isLoggedIn = function (done) {
     return isLogged;
 };
 
-//Store.ChatClass.default.prototype.sendMessage = function (e) {
-//    return Store.SendTextMsgToChat(this,e);
-//};
-//Store.ChatClass.default.prototype.sendSeen = function (e) {
-//    return Store.SendSeen(this,e);
-//};
+Store.ChatClass.default.prototype.sendMessage = function (e) {
+    return Store.SendTextMsgToChat(this,e);
+};
+Store.ChatClass.default.prototype.sendSeen = function (e) {
+    return Store.SendSeen(this,e);
+};
 
