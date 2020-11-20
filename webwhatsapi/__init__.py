@@ -74,7 +74,7 @@ class WhatsAPIDriver(object):
         'firstrun': "#wrapper",
         'qrCode': "canvas[aria-label=\"Scan me!\"]",
         'qrCodePlain': "._2EZ_m",
-        'mainPage': ".h70RQ.two",
+        'mainPage': "._36Q2N.two",
         'chatList': ".infinite-list-viewport",
         'messageList': "#main > div > div:nth-child(1) > div > div.message-list",
         'unreadMessageBar': "#main > div > div:nth-child(1) > div > div.message-list > div.msg-unread",
@@ -113,12 +113,10 @@ class WhatsAPIDriver(object):
 
     def set_local_storage(self, data):
         self.driver.execute_script(
-            'indexedDB.deleteDatabase(\'wawc\');'.join(
-                ["window.localStorage.setItem('{}', '{}');".format(
-                    k, v.replace("\n","\\n") if isinstance(v, str) else v
-                ) for k, v in data.items()]
-            )
+            'indexedDB.deleteDatabase(\'wawc\');'
         )
+        self.driver.execute_script(''.join(["window.localStorage.setItem('{}', '{}');".format(k, v)
+                                            for k, v in data.items()]))
 
     def save_firefox_profile(self, remove_old=False):
         "Function to save the firefox profile to the permanant one"
